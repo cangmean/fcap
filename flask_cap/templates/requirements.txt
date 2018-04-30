@@ -8,5 +8,5 @@ gunicorn
 oss2
 pymysql
 xlwt
-pycrypto
+pycryptodome
 rsa
