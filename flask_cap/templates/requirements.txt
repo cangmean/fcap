@@ -1,0 +1,12 @@
+flask
+flask_script
+flask_restful
+flask_sqlalchemy
+click
+gevent
+gunicorn
+oss2
+pymysql
+xlwt
+pycrypto
+rsa

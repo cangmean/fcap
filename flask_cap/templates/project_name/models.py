@@ -1,0 +1,135 @@
+"""
+数据模型
+"""
+
+from datetime import datetime
+from flask import jsonify
+from flask_login import UserMixin
+from {{ project_name }}.extends import db, login_manager
+from {{ project_name }}.utils import cryptor
+from {{ project_name }}.utils import get_code
+
+# pylint: disable=all
+
+
+class User(db.Model, UserMixin):
+    """ 用户"""
+
+    __table_args__ = {
+        'mysql_engine': 'InnoDB',
+        'mysql_charset': 'utf8',
+    }
+
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    password_hash = db.Column(db.String(50), nullable=False)
+    salt = db.Column(db.String(50), nullable=False)
+    role_id = db.Column(db.Integer, db.ForeignKey('role.id'))
+    role = db.relationship(
+        'Role', backref=db.backref('users', lazy='dynamic')
+    )
+    create_time = db.Column(db.DateTime, default=datetime.now)
+    update_time = db.Column(db.DateTime, default=datetime.now)
+    last_login_time = db.Column(db.DateTime, default=datetime.now)
+    soft_del = db.Column(db.Boolean, default=False)
+
+    def __init__(self, username, password):
+        """ 初始化"""
+        self.username = username
+        self.password = password
+
+    @classmethod
+    def create(cls, username, password, role=None):
+        """ 创建用户"""
+        _user = cls(username, password)
+        if role:
+            _user.role = role
+        db.session.add(_user)
+        db.session.commit()
+        return _user
+
+    @property
+    def password(self):
+        """ 获取密码hash值"""
+        raise AttributeError('Password is not readable.')
+
+    @password.setter
+    def password(self, password):
+        """ 设置密码"""
+        salt = get_code()
+        self.salt = salt
+        self.password_hash = cryptor.encrypt(password, salt=salt)
+
+    def verify_password(self, password):
+        """ 验证密码"""
+        return self.password_hash == cryptor.encrypt(password, salt=self.salt)
+
+    def is_admin(self):
+        """ 是否是管理员"""
+        role = Role.query.filter_by(name='注册用户').first()
+        return self.role != role
+    
+    def __repr__(self):
+        return '<User id: {}, username: {}>'.format(self.id, self.username)
+
+
+class Role(db.Model):
+    """ 角色"""
+
+    __table_args__ = {
+        'mysql_engine': 'InnoDB',
+        'mysql_charset': 'utf8',
+    }
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique=True, nullable=False)
+    create_time = db.Column(db.DateTime, default=datetime.now)
+    update_time = db.Column(db.DateTime, default=datetime.now)
+    soft_del = db.Column(db.Boolean, default=False)
+
+    @classmethod
+    def get(cls, **kw):
+        role = cls.query.filter_by(**kw).first()
+        return role
+
+    def __repr__(self):
+        return '<Role id: {}, name: {}>'.format(self.id, self.name)
+
+
+
+def authenticate(username, password):
+    """ 验证"""
+    user = User.query.filter_by(username=username).first()
+    if user and user.verify_password(password):
+        return user
+
+
+def identity(payload):
+    """ 获取用户身份"""
+    user_id = payload['identity']
+    return User.query.filter_by(id=user_id).first()
+
+
+def auth_response(token, identity):
+    """ 认证返回"""
+    return jsonify({
+        'access_token': token.decode('utf-8'),
+        'username': identity.username,
+        'role': identity.role.name,
+    })
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    """ 获取登录用户"""
+    user = User.query.filter_by(id=user_id).first()
+    return user
+
+
+# @login_manager.unauthorized_handler
+# def unauthenticated():
+#     """ 用户未登录"""
+#     return jsonify({
+#         'code': 0,
+#         'msg': '用户没有登录',
+#     })

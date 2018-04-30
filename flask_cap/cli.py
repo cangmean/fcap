@@ -1,0 +1,110 @@
+import os
+import click
+from jinja2 import Environment, select_autoescape, FileSystemLoader
+
+# pylint: disable=all
+
+base_path = os.path.dirname(os.path.abspath(__file__))
+templates_path = os.path.join(base_path, 'templates')
+
+env = Environment(
+    loader=FileSystemLoader(templates_path),
+    autoescape=select_autoescape(
+        default_for_string=True,
+        default=True,
+    )
+)
+
+
+class ProjectMaker(object):
+    """ 项目脚手架
+    """
+    def __init__(self, project_name, base_name='project_name'):
+        """
+        :param project_name: 新建的项目名称
+        :param base_name: 覆盖的变量 {{ base_name }}
+        :param prefix_length: 路径前缀
+        """
+        self.base_name = base_name
+        self.project_name = project_name
+        self.prefix_length = len(templates_path) + 1
+    
+    @property
+    def top_dir(self):
+        """ 项目的顶级目录
+        """
+        return os.path.join(
+            os.getcwd(), self.project_name,
+        )
+    
+    def render_templates(self, path):
+        """ 渲染函数
+        :param path: 模板目录
+        """
+        # 参考了 https://github.com/django/django/blob/master/django/core/management/templates.py#L120
+        prefix_length = len(templates_path) + 1
+        for root, dirs, files in os.walk(path):
+            # 获取相对文件路径
+            path_rest = root[prefix_length:]
+            relative_dir = path_rest.replace(
+                self.base_name,
+                self.project_name
+            )
+            # 如果相对目录不存在则创建
+            if relative_dir:
+                target_dir = os.path.join(self.top_dir, relative_dir)
+                if not os.path.exists(target_dir):
+                    os.mkdir(target_dir)
+
+            # 清楚隐藏文件和缓存文件
+            for dirname in dirs[:]:
+                if dirname.startswith('.') or dirname == '__pycache__':
+                    dirs.remove(dirname)
+            
+            # 
+            for filename in files:
+                if filename.endswith(('.pyo', '.pyc', '.py.class')):
+                    # Ignore some files as they cause various breakages.
+                    continue
+                # 模板文件路径, 和需要生成文件路径
+                old_path = os.path.join(root, filename)
+                new_path = os.path.join(
+                    self.top_dir,
+                    relative_dir,
+                    filename.replace(
+                        self.base_name,
+                        self.project_name,
+                    )
+                )
+                _template = env.get_template(
+                    os.path.join(path_rest, filename)
+                )
+                kw = {
+                    self.base_name: self.project_name
+                }
+                content = _template.render(**kw)
+                with open(new_path, 'w', encoding='utf-8') as fd:
+                    fd.write(content)
+
+    def make(self):
+        if os.path.exists(self.top_dir):
+            raise FileExistsError(
+                'Project name {} exists.'.format(self.project_name)
+            )
+        else:
+            os.mkdir(self.top_dir)
+        self.render_templates(templates_path)
+
+
+@click.command()
+@click.option('--project', help='make a project.')
+def make_app(project):
+    pm = ProjectMaker(project)
+    pm.make()
+
+
+def main():
+    make_app()
+
+if __name__ == '__main__':
+    main()
