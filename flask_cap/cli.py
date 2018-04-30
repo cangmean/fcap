@@ -56,7 +56,6 @@ class ProjectMaker(object):
                 self.base_name,
                 self.project_name
             )
-            print(root, dirs, files)
             # 如果相对目录不存在则创建
             if relative_dir:
                 target_dir = os.path.join(self.top_dir, relative_dir)
