@@ -1,0 +1,6 @@
+LOCAL_DB_CONFIG = dict(
+    host='127.0.0.1',
+    db='{{ project_name }}',
+    username='root',
+    password='654321',
+)

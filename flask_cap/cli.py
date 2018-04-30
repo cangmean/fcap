@@ -1,5 +1,6 @@
 import os
 import click
+import shutil
 from jinja2 import Environment, select_autoescape, FileSystemLoader
 
 # pylint: disable=all
@@ -19,10 +20,15 @@ env = Environment(
 class ProjectMaker(object):
     """ 项目脚手架
     """
+
+    rewrite_template_suffixes = (
+        ('.py-tpl', '.py'),
+    )
+    
     def __init__(self, project_name, base_name='project_name'):
         """
         :param project_name: 新建的项目名称
-        :param base_name: 覆盖的变量 {{ base_name }}
+        :param base_name: 覆盖的变量 {{ project_name }}
         :param prefix_length: 路径前缀
         """
         self.base_name = base_name
@@ -50,18 +56,18 @@ class ProjectMaker(object):
                 self.base_name,
                 self.project_name
             )
+            print(root, dirs, files)
             # 如果相对目录不存在则创建
             if relative_dir:
                 target_dir = os.path.join(self.top_dir, relative_dir)
                 if not os.path.exists(target_dir):
                     os.mkdir(target_dir)
 
-            # 清楚隐藏文件和缓存文件
+            # 清除隐藏文件和缓存文件
             for dirname in dirs[:]:
                 if dirname.startswith('.') or dirname == '__pycache__':
                     dirs.remove(dirname)
             
-            # 
             for filename in files:
                 if filename.endswith(('.pyo', '.pyc', '.py.class')):
                     # Ignore some files as they cause various breakages.
@@ -76,6 +82,12 @@ class ProjectMaker(object):
                         self.project_name,
                     )
                 )
+                # 将.py-tpl文件重命名成.py文件
+                for old_suffix, new_suffix in self.rewrite_template_suffixes:
+                    if new_path.endswith(old_suffix):
+                        new_path = new_path[:-len(old_suffix)] + new_suffix
+                        break  # Only rewrite once
+
                 _template = env.get_template(
                     os.path.join(path_rest, filename)
                 )
@@ -89,7 +101,7 @@ class ProjectMaker(object):
     def make(self):
         if os.path.exists(self.top_dir):
             raise FileExistsError(
-                'Project name {} exists.'.format(self.project_name)
+                '{} already exists.'.format(self.project_name)
             )
         else:
             os.mkdir(self.top_dir)
