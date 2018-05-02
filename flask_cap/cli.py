@@ -25,14 +25,16 @@ class ProjectMaker(object):
         ('.py-tpl', '.py'),
     )
     
-    def __init__(self, project_name, base_name='project_name'):
+    def __init__(self, project_name, app_name, base_name='project_name'):
         """
         :param project_name: 新建的项目名称
+        :param app_name: 新建项目中app的名称
         :param base_name: 覆盖的变量 {{ project_name }}
         :param prefix_length: 路径前缀
         """
         self.base_name = base_name
         self.project_name = project_name
+        self.app_name = app_name
         self.prefix_length = len(templates_path) + 1
     
     @property
@@ -52,9 +54,10 @@ class ProjectMaker(object):
         for root, dirs, files in os.walk(path):
             # 获取相对文件路径
             path_rest = root[prefix_length:]
+            # 修改子目录名称为app_name
             relative_dir = path_rest.replace(
                 self.base_name,
-                self.project_name
+                self.app_name
             )
             # 如果相对目录不存在则创建
             if relative_dir:
@@ -78,7 +81,7 @@ class ProjectMaker(object):
                     relative_dir,
                     filename.replace(
                         self.base_name,
-                        self.project_name,
+                        self.app_name,
                     )
                 )
                 # 将.py-tpl文件重命名成.py文件
@@ -91,7 +94,7 @@ class ProjectMaker(object):
                     os.path.join(path_rest, filename)
                 )
                 kw = {
-                    self.base_name: self.project_name
+                    self.base_name: self.app_name
                 }
                 content = _template.render(**kw)
                 with open(new_path, 'w', encoding='utf-8') as fd:
@@ -109,8 +112,14 @@ class ProjectMaker(object):
 
 @click.command()
 @click.option('--project', help='make a project.')
-def make_app(project):
-    pm = ProjectMaker(project)
+@click.option('--app', help='set a app name.')
+def make_app(project, app):
+    if not project:
+        click.echo('Project name is not defined.')
+        return
+    if not app:
+        app = project
+    pm = ProjectMaker(project, app)
     pm.make()
 
 
