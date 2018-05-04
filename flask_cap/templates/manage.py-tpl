@@ -33,12 +33,23 @@ def init():
 def drop():
     db.drop_all()
 
+
+@manager.command
+def runserver():
+    os.system('gunicorn -c unicorn.py manage:app')
+
+@manager.command
+def celery_send_mail():
+    os.system('celery worker -A celery_worker.celery --loglevel=info')
+
+
 manager.add_command('run', Server(
     host='127.0.0.1',
     port=5000,
     use_reloader=True,
     use_debugger=True
 ))
+
 
 
 def main():

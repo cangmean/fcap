@@ -21,7 +21,7 @@ DB_CONFIG = dict(
 )
 
 try:
-    from local_seetings import LOCAL_DB_CONFIG
+    from local_settings import LOCAL_DB_CONFIG
     DB_CONFIG.update(LOCAL_DB_CONFIG)
     print('db config: ', DB_CONFIG)
 except ImportError:
@@ -42,3 +42,7 @@ external_url = ''
 ACCESS_ID = ''
 ACCESS_SECRET = ''
 BUCKET_NAME = ''
+
+# celery 配置
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = "redis://localhost:6379/0"

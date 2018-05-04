@@ -2,8 +2,16 @@
 应用模块
 """
 from flask import Flask
+from celery import Celery
 
 # pylint: disable=all
+
+
+celery = Celery(
+    __name__,
+    broker='redis://localhost:6379/0',
+    backend='redis://localhost:6379/0',
+)
 
 
 def create_app():
@@ -13,6 +21,7 @@ def create_app():
     )
 
     configure_app(app)
+    configure_celery_app(app)
     configure_request_hook(app)
     configure_extensions(app)
     configure_blueprints(app)
@@ -23,6 +32,11 @@ def configure_app(app):
     """ 基础配置"""
     from {{ project_name }} import config as config_file
     app.config.from_object(config_file)
+
+
+def configure_celery_app(app):
+    """ 配置celery"""
+    celery.conf.update(app.config)
 
 
 def configure_blueprints(app):
