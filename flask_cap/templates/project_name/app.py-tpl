@@ -49,10 +49,14 @@ def configure_blueprints(app):
 
 def configure_extensions(app):
     """ 配置扩展"""
-    from {{ project_name }}.extends import api, db, login_manager
+    from {{ project_name }}.extends import (
+        api, db, login_manager, mail, redis_store
+    )
     api.init_app(app)
     db.init_app(app)
     login_manager.init_app(app)
+    mail.init_app(app)
+    redis_store.init_app(app)
 
 
 def configure_request_hook(app):
