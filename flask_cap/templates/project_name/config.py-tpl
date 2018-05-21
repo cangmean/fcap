@@ -2,6 +2,7 @@
 项目配置文件
 """
 import os
+from kombu import Queue, Exchange
 
 ROOT_DIR = os.path.dirname(
     os.path.dirname(os.path.abspath(__file__))
