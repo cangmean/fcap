@@ -2,6 +2,7 @@
 项目配置文件
 """
 import os
+import logging
 from kombu import Queue, Exchange
 
 ROOT_DIR = os.path.dirname(
@@ -20,15 +21,6 @@ DB_CONFIG = dict(
     db='{{ project_name }}',
     username='root',
     password='654321',
-)
-
-# 日志
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s %(filename)s [line:%(lineno)d] %(levelname)s %(message)s',
-    datefmt='%Y%m%d %H:%M:%S',
-    filename='{{ project_name }}.log',
-    filemode='a'
 )
 
 # mail 配置
@@ -76,6 +68,16 @@ try:
     print('oss config: ', LOCAL_OSS_CONFIG)
 except ImportError:
     pass
+
+if not DEBUG:
+    # 日志
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s %(filename)s [line:%(lineno)d] %(levelname)s %(message)s',
+        datefmt='%Y%m%d %H:%M:%S',
+        filename='{{ project_name }}.log',
+        filemode='a'
+    )
 
 # 数据库连接
 DB_URI = "mysql+pymysql://{}:{}@{}/{}?charset=utf8".format(
