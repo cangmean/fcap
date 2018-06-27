@@ -10,13 +10,11 @@ class RestMixin(object):
         return user
     
     def ok(self, **kw):
-        kw.update({
-            'status': 200,
-        })
-        return jsonify(**kw)
+        dic = {'status': 200}
+        dic.update(kw)
+        return jsonify(**dic)
     
     def no(self, **kw):
-        kw.update({
-            'status': 500,
-        })
+        dic = {'status': 500}
+        dic.update(kw)
         return jsonify(**kw)

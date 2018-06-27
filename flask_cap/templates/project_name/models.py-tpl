@@ -8,6 +8,7 @@ from flask_login import UserMixin
 from {{ project_name }}.extends import db, login_manager
 from {{ project_name }}.utils import cryptor
 from {{ project_name }}.utils import get_code
+from {{ project_name }}.mixins.crud import CRUDMixin
 
 # pylint: disable=all
 
@@ -73,7 +74,7 @@ class User(db.Model, UserMixin):
         return '<User id: {}, username: {}>'.format(self.id, self.username)
 
 
-class Role(db.Model):
+class Role(db.Model, CRUDMixin):
     """ 角色"""
 
     __table_args__ = {
@@ -86,11 +87,6 @@ class Role(db.Model):
     create_time = db.Column(db.DateTime, default=datetime.now)
     update_time = db.Column(db.DateTime, default=datetime.now)
     soft_del = db.Column(db.Boolean, default=False)
-
-    @classmethod
-    def get(cls, **kw):
-        role = cls.query.filter_by(**kw).first()
-        return role
 
     def __repr__(self):
         return '<Role id: {}, name: {}>'.format(self.id, self.name)

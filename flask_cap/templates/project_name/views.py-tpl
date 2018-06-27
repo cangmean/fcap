@@ -1,6 +1,6 @@
-from flask import Bluprint
+from flask import Blueprint
 
-bp = Bluprint('home', __name__)
+bp = Blueprint('home', __name__)
 
 
 @bp.route('/')

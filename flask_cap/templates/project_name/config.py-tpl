@@ -12,7 +12,7 @@ DOWN_DIR = os.path.join(
     'downloads',
 )
 
-DEBUG = True
+DEBUG = False
 SECRET_KEY = b'flask_cap make a project'
 REDIS_URL = "redis://localhost:6379/0"
 DB_CONFIG = dict(
@@ -22,21 +22,14 @@ DB_CONFIG = dict(
     password='654321',
 )
 
-try:
-    from local_settings import LOCAL_DB_CONFIG
-    DB_CONFIG.update(LOCAL_DB_CONFIG)
-    print('db config: ', DB_CONFIG)
-except ImportError:
-    pass
-
-# 数据库连接
-DB_URI = "mysql+pymysql://{}:{}@{}/{}?charset=utf8".format(
-    DB_CONFIG['username'], DB_CONFIG['password'],
-    DB_CONFIG['host'], DB_CONFIG['db'],
+# 日志
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s %(filename)s [line:%(lineno)d] %(levelname)s %(message)s',
+    datefmt='%Y%m%d %H:%M:%S',
+    filename='{{ project_name }}.log',
+    filemode='a'
 )
-
-SQLALCHEMY_DATABASE_URI = DB_URI
-SQLALCHEMY_TRACK_MODIFICATIONS = True
 
 # mail 配置
 MAIL_SERVER = ''
@@ -57,6 +50,8 @@ BUCKET_NAME = ''
 # celery 配置 -Q `task_name` 指定开启的队列
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
 CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+CELERYD_MAX_TASKS_PER_CHILD = 20
+CELERYD_TASK_TIME_LIMIT = 60
 CELERY_QUEUES = {
     Queue("default", Exchange("default"), routing_key="default"),
     Queue("task_email", Exchange("task_email"), routing_key="task_email"),
@@ -67,3 +62,26 @@ CELERY_ROUTES = {
         "routing_key": "task_email"
     },
 }
+
+try:
+    from local_settings import LOCAL_DB_CONFIG, LOCAL_DEBUG_CONFIG, LOCAL_OSS_CONFIG
+    DB_CONFIG.update(LOCAL_DB_CONFIG)
+    DEBUG = LOCAL_DEBUG_CONFIG
+    internal_url = LOCAL_OSS_CONFIG['internal_url']
+    external_url = LOCAL_OSS_CONFIG['external_url']
+    ACCESS_ID = LOCAL_OSS_CONFIG['ACCESS_ID']
+    ACCESS_SECRET = LOCAL_OSS_CONFIG['ACCESS_SECRET']
+    BUCKET_NAME = LOCAL_OSS_CONFIG['BUCKET_NAME']
+    print('db config: ', DB_CONFIG)
+    print('oss config: ', LOCAL_OSS_CONFIG)
+except ImportError:
+    pass
+
+# 数据库连接
+DB_URI = "mysql+pymysql://{}:{}@{}/{}?charset=utf8".format(
+    DB_CONFIG['username'], DB_CONFIG['password'],
+    DB_CONFIG['host'], DB_CONFIG['db'],
+)
+
+SQLALCHEMY_DATABASE_URI = DB_URI
+SQLALCHEMY_TRACK_MODIFICATIONS = True

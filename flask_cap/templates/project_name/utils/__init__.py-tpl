@@ -5,6 +5,8 @@
 import os
 import re
 import time
+import uuid
+import hashlib
 import random
 import string
 import datetime
@@ -17,6 +19,11 @@ from {{ project_name }}.config import DOWN_DIR
 def get_current_time(fmt="%F %T"):
     """ 获取当前时间字符串"""
     return datetime.datetime.now().strftime(fmt)
+
+
+def get_uuid(length=16):
+    uid = str(uuid.uuid1()).encode('utf8')
+    return hashlib.md5(uid).hexdigest()[:length]
 
 
 def get_code(length=6, code_type='int'):
@@ -79,7 +86,12 @@ def make_excel(title, headers, datas, filename='info.xls'):
     path = os.path.join(DOWN_DIR, filename)
     wb.save(path)
     return path
-    
+
+
+def url_route(url):
+    """ 解析url 并生成oss相对路径"""
+    route = re.sub(r'(http.*?\.com/)', '', url)
+    return route
 
 if __name__ == '__main__':
     print(camel_to_line('hello'))
