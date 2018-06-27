@@ -1,6 +1,6 @@
-Flask-cap
+fcap
 =========
-Flask-cap是模仿了Django-admin的脚手架, 用于快速搭建和配置项目.
+fcap是模仿了Django-admin的脚手架, 用于快速搭建和配置项目.
 
 下载
 ------
@@ -12,9 +12,9 @@ Flask-cap是模仿了Django-admin的脚手架, 用于快速搭建和配置项目
 
 简单例子
 ---------
-执行flask-cap命令创建项目
+执行fcap命令创建项目
 
 .. code-block:: text
 
-    $ flask-cap --project <project_name>
+    $ fcap --project <project_name>
 
