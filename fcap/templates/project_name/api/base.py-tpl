@@ -2,5 +2,5 @@ from flask_restful import Resource
 from {{ project_name }}.mixins.rest import RestMixin
 
 
-class RestApi(Resource, RestApi):
+class RestApi(Resource, RestMixin):
     pass
