@@ -1,13 +1,15 @@
 from setuptools import setup, find_packages
+import fcap
 
-version = '0.2'
+version = fcap.__version__
+author = fcap.__author__
 
 setup(
     name="fcap",
     version=version,
     packages=find_packages(),
     include_package_data=True,
-    author='cangmean',
+    author=author,
     url='https://github.com/cangmean/fcap',
     install_requires=[
         'click',

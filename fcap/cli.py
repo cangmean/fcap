@@ -1,4 +1,5 @@
 import os
+import sys
 import click
 import shutil
 from jinja2 import Environment, select_autoescape, FileSystemLoader
@@ -108,12 +109,27 @@ class ProjectMaker(object):
         else:
             os.mkdir(self.top_dir)
         self.render_templates(templates_path)
+    
+    @classmethod
+    def _make_templates(cls, path):
+        """ 将目录加载成templates格式的文件"""
+        for root, dirs, files in os.walk(path):
+            for filename in files:
+                if not filename.endswith('.py'):
+                    continue
+                file_path = os.path.join(root, filename)
+                new_file_path = file_path[:-3] + '.py-tpl'
+                os.rename(file_path, new_file_path)
 
 
 @click.command()
-@click.option('--project', help='make a project.')
-@click.option('--app', help='set a app name.')
-def make_app(project, app):
+@click.option('-P', '--project', help='make a project.')
+@click.option('-A', '--app', help='set a app name.')
+@click.option('-T', '--templates', help="load template path")
+def make_app(project, app, templates):
+    if templates:
+        ProjectMaker._make_templates(templates)
+        return
     if not project:
         click.echo('Project name is not defined.')
         return
