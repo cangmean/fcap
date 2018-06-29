@@ -1,5 +1,12 @@
 from flask_restful import Resource
+from flask_restful.utils.cors import crossdomain
 from {{ project_name }}.mixins.rest import RestMixin
+
+__all__ = (
+    'router',
+    'register_restful_api',
+    'RestApi',
+)
 
 REST_API_RULE_MAPS = {}
 
@@ -33,4 +40,8 @@ def register_restful_api(api):
 
 
 class RestApi(Resource, RestMixin):
-    pass
+    headers = [
+        'content-type',
+    ]
+    
+    decorators = [crossdomain(origin="*", headers=headers)]
