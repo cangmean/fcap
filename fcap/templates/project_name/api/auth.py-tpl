@@ -1,0 +1,60 @@
+from .base import RestApi, router, token_required
+from flask import request
+from flask_restful import reqparse
+from {{ project_name }}.models import authenticate
+from {{ project_name }}.utils import get_code
+from {{ project_name }}.utils.tokens import make_api_token, get_token, set_token
+
+
+app_dict = {
+    'app_id': '',
+    'app_secret': '',
+    'expires': 7200,
+}
+
+
+@router('/api/v1/token')
+class TokenApi(RestApi):
+
+    def parse_form(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument(
+            'app_id', required=True, help="app_id not found", location="form"
+        )
+        parser.add_argument(
+            'app_secret', required=True, help="app_secret not found.", location=['form']
+        )
+        return parser.parse_args()
+    
+    def check_app(self, data):
+        flag = True
+        for k, v in app_dict.items():
+            if data.get(k, '') != v:
+                flag = False
+                break
+        return flag
+
+    def post(self):
+        data = self.parse_form()
+        if not self.check_app(data):
+            return self.no(msg="Invalid app_id or app_secret")
+        token = make_api_token(data['app_id'], data['app_secret'], app_dict['expires'])
+        return self.ok(access_token=token.decode('utf8'), expire_in=app_dict['expires'])
+
+
+@router('/api/v1/login')
+class LoginHandler(RestApi):
+
+    def post(self):
+        data = request.get_json()
+        username = data.get('username')
+        password = data.get('password')
+        user = authenticate(username, password)
+        if user:
+            token = get_code(code_type='string')
+            set_token(user.id, token)
+            return self.ok(
+                token=token,
+            )
+        else:
+            return self.no(msg="Invalid username or password.")

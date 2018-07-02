@@ -7,6 +7,7 @@ import re
 import time
 import uuid
 import hashlib
+import base64
 import random
 import string
 import datetime
@@ -35,6 +36,24 @@ def get_code(length=6, code_type='int'):
     code = random.sample(alpha, length)
     code = ''.join(code)
     return code
+
+
+def sha1_hash(text):
+    """ sha1加密"""
+    text = to_bytes(text)
+    return hashlib.sha1(text).hexdigest()
+
+
+def encode(text):
+    """ base64 加密"""
+    text = to_bytes(text)
+    return base64.b64encode(text)
+
+
+def decode(text):
+    """ base64 解密"""
+    text = to_bytes(text)
+    return base64.b64decode(text)
 
 
 def get_time():
