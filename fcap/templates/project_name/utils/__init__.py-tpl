@@ -12,6 +12,8 @@ import random
 import string
 import datetime
 import xlwt
+from functools import wraps
+from inspect import signature
 from {{ project_name }}.config import DOWN_DIR
 
 # pylint: disable=all
