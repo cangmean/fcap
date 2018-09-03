@@ -14,7 +14,7 @@ import datetime
 import xlwt
 from functools import wraps
 from inspect import signature
-from {{ project_name }}.config import DOWN_DIR
+from {{ project_name }}.config.default import DOWN_DIR
 
 # pylint: disable=all
 

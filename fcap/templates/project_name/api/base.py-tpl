@@ -1,7 +1,6 @@
 from flask_restful import Resource
 from flask_restful.utils.cors import crossdomain
 from {{ project_name }}.mixins.rest import RestMixin
-from {{ project_name }}.utils.tokens import get_token, has_token, validate_api_token
 
 __all__ = (
     'router',
@@ -38,33 +37,6 @@ def register_restful_api(api):
         api.add_resource(
             cls, url,
         )
-
-
-def login_required(func):
-    """ 验证token"""
-
-    @wraps(func)
-    def deco(*args, **kw):
-        token = request.headers.get('x-token')
-        if not token:
-            return jsonify(status=500, msg="Not found token")
-        if not has_token(token):
-            return jsonify(status=500, msg="Invalid token.")
-        return func(*args, **kw)
-    return deco
-
-
-def token_required(func):
-    """ 验证api token"""
-    @wraps(func)
-    def deco(*args, **kw):
-        token = request.args.get('access_token')
-        if not token:
-            return jsonify(status=500, msg="Not found access token")
-        if not validate_api_token(token):
-            return jsonify(status=500, msg="Invalid access token.")
-        return func(*args, **kw)
-    return deco
 
 
 class RestApi(Resource, RestMixin):

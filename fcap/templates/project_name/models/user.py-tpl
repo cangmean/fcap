@@ -5,8 +5,7 @@
 from datetime import datetime
 from flask import jsonify
 from flask_login import UserMixin
-from {{ project_name }}.extends import db, login_manager
-from {{ project_name }}.utils import cryptor
+from {{ project_name }}.extends import db, login_manager, cryptor
 from {{ project_name }}.utils import get_code
 from {{ project_name }}.mixins.crud import CRUDMixin
 

@@ -3,7 +3,7 @@
 """
 from flask_script import Server, Manager
 from {{ project_name }}.app import create_app
-from {{ project_name }}.models import db, User, Role
+from {{ project_name }}.models.user import db, User, Role
 from {{ project_name }}.utils import get_code
 
 # pylint: disable=all

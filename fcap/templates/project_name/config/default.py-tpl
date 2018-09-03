@@ -13,7 +13,7 @@ DOWN_DIR = os.path.join(
     'downloads',
 )
 
-DEBUG = False
+DEBUG = True
 SECRET_KEY = b'flask_cap make a project'
 REDIS_URL = "redis://localhost:6379/0"
 DB_CONFIG = dict(
@@ -23,6 +23,8 @@ DB_CONFIG = dict(
     password='654321',
 )
 
+FET_AES_SECRET_KEY = b'fet aes secret key'
+
 # mail 配置
 MAIL_SERVER = ''
 MAIL_PORT = 25 # 465 sll mode
@@ -31,13 +33,6 @@ MAIL_USE_SSL = False
 MAIL_USERNAME = ''
 MAIL_PASSWORD = ''
 MAIL_DEFAULT_SENDER = ''
-
-# alioss 配置
-internal_url = ''
-external_url = ''
-ACCESS_ID = ''
-ACCESS_SECRET = ''
-BUCKET_NAME = ''
 
 # celery 配置 -Q `task_name` 指定开启的队列
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
@@ -55,29 +50,11 @@ CELERY_ROUTES = {
     },
 }
 
-try:
-    from local_settings import LOCAL_DB_CONFIG, LOCAL_DEBUG_CONFIG, LOCAL_OSS_CONFIG
-    DB_CONFIG.update(LOCAL_DB_CONFIG)
-    DEBUG = LOCAL_DEBUG_CONFIG
-    internal_url = LOCAL_OSS_CONFIG['internal_url']
-    external_url = LOCAL_OSS_CONFIG['external_url']
-    ACCESS_ID = LOCAL_OSS_CONFIG['ACCESS_ID']
-    ACCESS_SECRET = LOCAL_OSS_CONFIG['ACCESS_SECRET']
-    BUCKET_NAME = LOCAL_OSS_CONFIG['BUCKET_NAME']
-    print('db config: ', DB_CONFIG)
-    print('oss config: ', LOCAL_OSS_CONFIG)
-except ImportError:
-    pass
-
-if not DEBUG:
-    # 日志
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s %(filename)s [line:%(lineno)d] %(levelname)s %(message)s',
-        datefmt='%Y%m%d %H:%M:%S',
-        filename='{{ project_name }}.log',
-        filemode='a'
-    )
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s %(filename)s [line:%(lineno)d] %(levelname)s %(message)s',
+    datefmt='%Y%m%d %H:%M:%S',
+)
 
 # 数据库连接
 DB_URI = "mysql+pymysql://{}:{}@{}/{}?charset=utf8".format(

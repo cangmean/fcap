@@ -1,7 +1,8 @@
 """
 应用模块
 """
-from flask import Flask
+
+from fet import _Flask as Flask
 from celery import Celery
 
 # pylint: disable=all
@@ -14,13 +15,13 @@ celery = Celery(
 )
 
 
-def create_app():
+def create_app(default='default'):
     """ 创建应用"""
     app = Flask(
         __name__,
     )
 
-    configure_app(app)
+    configure_app(app, config_file=default)
     configure_celery_app(app)
     configure_request_hook(app)
     configure_extensions(app)
@@ -28,10 +29,18 @@ def create_app():
     return app
 
 
-def configure_app(app):
+def configure_app(app, config_dir="{{ project_name }}.config", config_file=None):
     """ 基础配置"""
-    from {{ project_name }} import config as config_file
-    app.config.from_object(config_file)
+    config_files = ['default']
+    if config_file and config_file not in config_files:
+        config_files.append(config_file)
+    
+    for config_file in config_files:
+        config_path = config_dir + '.' + config_file
+        if config_path.endswith('.py'):
+            app.config.from_pyfile(config_path)
+        else:
+            app.config.from_object(config_path)
 
 
 def configure_celery_app(app):
@@ -42,21 +51,22 @@ def configure_celery_app(app):
 def configure_blueprints(app):
     """ 配置蓝图"""
     from {{ project_name }}.api import bp as api_bp
-    from {{ project_name }}.views import bp as views_bp
+    from {{ project_name }}.views.home import bp as home_bp
     app.register_blueprint(api_bp)
-    app.register_blueprint(views_bp)
+    app.register_blueprint(home_bp)
 
 
 def configure_extensions(app):
     """ 配置扩展"""
     from {{ project_name }}.extends import (
-        api, db, login_manager, mail, redis_store
+        api, db, login_manager, mail, redis_store, cryptor
     )
     api.init_app(app)
     db.init_app(app)
     login_manager.init_app(app)
     mail.init_app(app)
     redis_store.init_app(app)
+    cryptor.init_app(app)
 
 
 def configure_request_hook(app):
