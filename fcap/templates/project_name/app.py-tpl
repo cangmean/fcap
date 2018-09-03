@@ -36,11 +36,11 @@ def configure_app(app, config_dir="{{ project_name }}.config", config_file=None)
         config_files.append(config_file)
     
     for config_file in config_files:
+        if config_file.endswith('.py'):
+            config_file = config_file[:-3]
+
         config_path = config_dir + '.' + config_file
-        if config_path.endswith('.py'):
-            app.config.from_pyfile(config_path)
-        else:
-            app.config.from_object(config_path)
+        app.config.from_object(config_path)
 
 
 def configure_celery_app(app):
