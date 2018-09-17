@@ -5,6 +5,7 @@ flask_login
 flask_mail
 flask_jwt_extended
 flask_sqlalchemy
+flask_migrate
 flask_redis
 click
 gevent
