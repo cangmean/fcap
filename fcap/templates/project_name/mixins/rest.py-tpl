@@ -17,4 +17,4 @@ class RestMixin(object):
     def no(self, **kw):
         dic = {'status': 500}
         dic.update(kw)
-        return jsonify(**kw)
+        return jsonify(**dic)
