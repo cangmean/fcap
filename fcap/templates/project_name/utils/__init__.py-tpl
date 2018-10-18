@@ -19,9 +19,14 @@ from {{ project_name }}.config.default import DOWN_DIR
 # pylint: disable=all
 
 
+def fmt_datetime(dt, fmt='%F %T'):
+    return dt.strftime(fmt)
+
+
 def get_current_time(fmt="%F %T"):
     """ 获取当前时间字符串"""
-    return datetime.datetime.now().strftime(fmt)
+    now = datetime.datetime.now()
+    return fmt_datetime(now, fmt)
 
 
 def get_uuid(length=16):
