@@ -1,5 +1,5 @@
 #!/bin/sh
-host="root@xxx.xxx.xxx.xxx"
+host="root@xxx.xxx.xx.xxx"
 branch="master"
 git status
 read -p "[INFO] 是否提交当前代码? [y/n] " flag
