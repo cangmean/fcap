@@ -1,20 +1,19 @@
 #!/bin/sh
-
 host="root@xxx.xxx.xxx.xxx"
-git st
-read -p "Do you push current code? [y/n] " flag
+git status
+read -p "[INFO] 是否提交当前代码? [y/n] " flag
 if [ $flag = "y" ]
 then
-    read -p "Please input commit message." message
+    read -p "[INFO] 请输入提交信息: " message
     if [ $message ]
     then 
         git add .
-        git cm $message
+        git commit -m $message
         # git push origin master
         # ssh $host < remote.sh
     else
-        echo "Don't input commit message."
+        echo "[ERROR] 没有输入提交信息"
     fi
 else
-    echo "Cancel push code."
+    echo "[INFO] 取消提交当前代码."
 fi
